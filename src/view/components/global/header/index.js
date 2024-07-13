@@ -10,7 +10,7 @@ const Header = () => {
             
             <Space>
                 <Button>
-                    Login
+                    Register
                 </Button>
 
                 <Button>
@@ -18,8 +18,6 @@ const Header = () => {
                 </Button>
 
             </Space>
-
-
         </Layout.Header>
     )
 }

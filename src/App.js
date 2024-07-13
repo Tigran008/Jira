@@ -1,13 +1,13 @@
-import Register from './view/pages/auth/register';
 import Header from './view/components/global/header/index';
+import Auth from './view/pages/auth';
 import './App.css';
 
 function App() {
   return (
-    <div className="App">\
+    <div className="App">
       <Header />
       
-      <Register />
+      <Auth />
     </div>
   );
 }
