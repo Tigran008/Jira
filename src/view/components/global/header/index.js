@@ -1,28 +1,33 @@
-import { Layout, Button, Typography, Space } from 'antd'
-import UserProfile from '../../shared/UserProfile'
-import './index.css'
+import { Layout, Button, Typography, Space } from 'antd';
+import UserProfile from '../../shared/UserProfile';
+import { Link } from 'react-router-dom';
+import './index.css';
 
-const Header = () => {
+const Header = ({ isAuth, userProfileInfo }) => { 
+   
     return (
-        <Layout.Header className='main_header'>
-            <Typography.Title level={3}>
-                Jira
-            </Typography.Title>
-            
+        <Layout.Header className="main_header">
+            <Link to="/">
+                <Typography.Title level={3}>
+                    Jira
+                </Typography.Title>
+            </Link>
+           
             <Space>
-                <Button>
-                    Register
-                </Button>
-
-                <Button>
-                    Login
-                </Button>
-
-                <UserProfile />
-
+                {
+                    isAuth ? (
+                        <UserProfile userProfileInfo={userProfileInfo} />
+                    ) : (
+                        <Link to="/login">
+                            <Button>
+                                Login
+                            </Button>
+                        </Link>
+                    )
+                }
             </Space>
         </Layout.Header>
     )
-}
+};
 
 export default Header;

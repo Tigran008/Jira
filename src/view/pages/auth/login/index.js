@@ -1,10 +1,12 @@
-import React from "react";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { Typography, Input, Button, Divider, Form, notification } from "antd";
-import { auth } from "../../../../services/firebase/firebase";
+import React from 'react';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../../../../services/firebase/firebase';
+import { Typography, Input, Button, Divider, Form, Flex } from 'antd';
+import AuthWrapper from '../../../components/shared/AuthWrapper';
+import LoginCoverImg from '../../../../core/images/loginCover.png';
+import { Link } from 'react-router-dom';
 
-const { Title } = Typography;
- 
+const { Title, Text } = Typography;
 class Login extends React.Component {
     constructor() {
         super();
@@ -17,60 +19,68 @@ class Login extends React.Component {
 
     handleFormChange = (value) => {
         this.setState(value);
-    }
+    };
 
     handleLogin = async () => {
         this.setState({
             loading: true
-        })
+        });
 
-        const {email, password} = this.state
-        
-        try {
-            const response = await signInWithEmailAndPassword(auth, email, password)
+        const { email, password } = this.state;
+        try{
+            const response = await signInWithEmailAndPassword(auth, email, password);
             console.log(response, 'response');
-        } catch(error) {
-            console.log(error, '>>>>');
-        } finally {
+        }catch(error) {
+            console.log(error, '>>>>>>');
+
+        }finally{
             this.setState({
                 loading: false
-            })
+            });
         }
     }
-
-    render() { 
+    
+    render() {
         return (
-            <div className="auth_container">
+            <AuthWrapper coverImg={LoginCoverImg}>
                 <Title level={3}>
-                    Login
+                    Sign In
                 </Title>
 
-                <Form onValuesChange={this.handleFormChange}>
-                    <Form.Item name="email"> 
+                <Form onValuesChange={this.handleFormChange} layout="vertical">
+                    <Form.Item name="email" label="Email">
                         <Input 
                             type="text"
                             placeholder="Email"
                         />
                     </Form.Item>
 
-                    <Form.Item name="password"> 
-                        <Input 
-                            type="password"
+                    <Form.Item name="password" label="Password">
+                        <Input.Password
                             placeholder="Password"
                         />
                     </Form.Item>
 
                     <Divider />
+                    
+                    <Flex justify="space-between" align="flex-end">
+                        <Text underline>
+                            <Link to="/register">
+                                Create Account
+                            </Link>
+                        </Text>
 
-                    <Button 
-                        type="primary"
-                        loading={this.state.loading}
-                        onClick={this.handleLogin}
-                    >
-                        Login
-                    </Button>
+                        <Button 
+                            type="primary"
+                            loading={this.state.loading}
+                            onClick={this.handleLogin}
+                        >
+                            Login
+                        </Button>
+                    </Flex>
+                    
                 </Form>
-            </div>
+            </AuthWrapper>
         )
     }
 }
