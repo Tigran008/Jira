@@ -1,133 +1,149 @@
 import React from 'react';
 import { Typography, Input, Button, Divider, Form, notification, Flex } from 'antd';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, EmailAuthCredential } from 'firebase/auth';
 import { auth, setDoc, doc, db } from '../../../../services/firebase/firebase';
 import AuthWrapper from '../../../components/shared/AuthWrapper';
 import registerCoverImg from '../../../../core/images/registerCover.png';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 
 import './index.css';
 
 const { Title, Text } = Typography;
 
-// createUserWithEmailAndPassword()
-class Register extends React.Component {
-    constructor() {
-        super();
-        this.state = {
-            loading: false,
-            firstName: '',
-            lastName: '',
-            email: '',
-            password: '',
-            headline: ''
-        }
+const Register = () => {
+    const [loading, setLoading] = useState(false);
+    const [ form ] = Form.useForm();
+    const navigate = useNavigate();
 
-        this.handleRegister = this.handleRegister.bind(this);
-    }
-
-    handleChangeInput = value => {
-       this.setState(value)
-    }
-    
-    async handleRegister() {
-        const { email, password, firstName, lastName, headline } = this.state; 
-        this.setState({
-            loading: true
-        });
-
-       try{
-        const response = await createUserWithEmailAndPassword(auth, email, password);
-
-        const uid = response.user.uid; 
-        
-        const createDoc = doc(db, 'registerUsers', uid);
-        setDoc(createDoc, {
-            firstName, lastName, headline, email
-        })
-        
-        notification.success({
-            message: 'Success Registration',
-            description: `Welcome dear ${firstName} ${lastName}`
-        })
-       } catch(error) {
+    const handleRegister = async (values) => {
+        setLoading(true);
+        try { 
+            const { email, password, ...restData } = values;
+            const response = await createUserWithEmailAndPassword(auth, email, password);
+            const uid = response.user.uid;
+            const createDoc = doc(db, 'registerUser', uid);
+            await setDoc(createDoc, {
+                email, ...restData
+            });
+            navigate('/login')
+        } catch(error) {
             notification.error({
                 message: 'Wrong Registration',
                 description: `Ooooops :(`
             })
-       } finally {
-            this.setState({
-                loading: false
-            });
-       }
+        } finally {
+            setLoading(false);
+        }
     }
 
+    return (
+        <AuthWrapper coverImg={registerCoverImg}>
+            <Title level={2}>
+                Register
+            </Title>
 
+            <Form form={form} onFinish={handleRegister} layout="vertical">
+                <Form.Item 
+                    name="firstName"
+                    label="First Name" 
+                    rules={[
+                        {
+                            required: true,
+                            message: 'First Name is required!'
+                        }
+                    ]}
+                >
+                    <Input 
+                        type="text"
+                        placeholder="First Name"
+                    />
+                </Form.Item>
 
-    render() {
-        return (
-            <AuthWrapper coverImg={registerCoverImg}>
-                <Title level={2}>
-                    Register
-                </Title>
+                <Form.Item 
+                    name="lastName"
+                    label="Last Name" 
+                    rules={[
+                        {
+                            required: true,
+                            message: 'Last Name is required!'
+                        }
+                    ]}
+                >
+                    <Input 
+                        type="text"
+                        placeholder="Last Name"
+                    />
+                </Form.Item>
 
-                <Form layout='vertical' onValuesChange={this.handleChangeInput}>
-                    <Form.Item label="First Name" name="firstName">
-                        <Input 
-                            type="text"
-                            placeholder="First Name"
-                        />
-                    </Form.Item>
+                <Form.Item 
+                    name="headline"
+                    label="Headline" 
+                    rules={[
+                        {
+                            required: true,
+                            message: 'Headline is required!'
+                        }
+                    ]}
+                >
+                    <Input 
+                        type="text"
+                        placeholder="Headline"
+                    />
+                </Form.Item>
 
-                    <Form.Item label="Last Name" name="lastName">
-                        <Input 
-                            type="text"
-                            placeholder="Last Name"
-                        />
-                    </Form.Item>
+                <Form.Item 
+                    name="email"
+                    label="Email" 
+                    rules={[
+                        {
+                            required: true,
+                            message: 'Email is required!'
+                        }
+                    ]}
+                >
+                    <Input 
+                        type="email"
+                        placeholder="Email"
+                    />
+                </Form.Item>
 
-                    <Form.Item label="Headline" name="headline">
-                        <Input 
-                            type="text"
-                            placeholder="Headline"
-                        />
-                    </Form.Item>
+                <Form.Item 
+                    name="password"
+                    label="Password" 
+                    rules={[
+                        {
+                            required: true,
+                            message: 'Password is required!'
+                        }
+                    ]}
+                >
+                    <Input.Password
+                        placeholder="Password"
+                    />
+                </Form.Item>
 
-                    <Form.Item label="Email" name="email">
-                        <Input 
-                            type="email"
-                            placeholder="Email"
-                        />
-                    </Form.Item>
+                <Divider />
 
-                    <Form.Item label="Password" name="password">
-                        <Input.Password
-                            placeholder="Password"
-                        />
-                    </Form.Item>
-
-                    <Divider />
-
-                    <Flex justify="space-between" align="flex-end">
-                        <Text underline>
-                            <Link to="/login">
-                                Sign In
-                            </Link>
-                        </Text>
-                     
-                        <Button
-                            type="primary" 
-                            onClick={this.handleRegister}
-                            loading={this.state.loading}
-                        >
-                            Register
-                        </Button>
-                    </Flex>
-                </Form>
-            </AuthWrapper>
-        )
-    }
-}
+                <Flex justify="space-between" align="flex-end">
+                    <Text underline>
+                        <Link to="/login">
+                            Sign In
+                        </Link>
+                    </Text>
+                 
+                    <Button
+                        type="primary" 
+                        htmlType="submit"
+                        loading={loading}
+                    >
+                        Register
+                    </Button>
+                </Flex>
+            </Form>
+        </AuthWrapper>
+    )
+};
 
 export default Register;
 
