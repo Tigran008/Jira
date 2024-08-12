@@ -1,18 +1,24 @@
+import React from 'react';
 import { Sidebar, SubHeader } from '../../components/global';
 import './index.css';
 
 const CabinetLayout = () => {
-    return (
-      <div className="cabinet_layout_container">
-          <Sidebar />
 
-          <SubHeader />
+  return (
+    <div className="cabinet_layout_container">
+        <Sidebar />
 
-          <main className="main_container">
+        <SubHeader />
 
-          </main>
-      </div>
-    )
+        <main className="main_container">
+
+        </main>
+    </div>
+  )
 };
-  
+
 export default CabinetLayout;
+
+
+
+

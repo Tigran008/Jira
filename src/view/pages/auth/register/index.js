@@ -1,38 +1,37 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Typography, Input, Button, Divider, Form, notification, Flex } from 'antd';
-import { createUserWithEmailAndPassword, EmailAuthCredential } from 'firebase/auth';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth, setDoc, doc, db } from '../../../../services/firebase/firebase';
 import AuthWrapper from '../../../components/shared/AuthWrapper';
 import registerCoverImg from '../../../../core/images/registerCover.png';
 import { Link, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
 
 import './index.css';
 
 const { Title, Text } = Typography;
 
 const Register = () => {
-    const [loading, setLoading] = useState(false);
     const [ form ] = Form.useForm();
     const navigate = useNavigate();
+    const [ loading, setLoading ] = useState(false);
 
     const handleRegister = async (values) => {
         setLoading(true);
-        try { 
+        try {
             const { email, password, ...restData } = values;
             const response = await createUserWithEmailAndPassword(auth, email, password);
             const uid = response.user.uid;
-            const createDoc = doc(db, 'registerUser', uid);
+            const createDoc = doc(db, 'registerUsers', uid);
             await setDoc(createDoc, {
                 email, ...restData
             });
-            navigate('/login')
-        } catch(error) {
+            navigate('/login');
+        }catch{
             notification.error({
                 message: 'Wrong Registration',
                 description: `Ooooops :(`
             })
-        } finally {
+        }finally{
             setLoading(false);
         }
     }
@@ -44,9 +43,9 @@ const Register = () => {
             </Title>
 
             <Form form={form} onFinish={handleRegister} layout="vertical">
-                <Form.Item 
+                <Form.Item
                     name="firstName"
-                    label="First Name" 
+                    label="First Name"
                     rules={[
                         {
                             required: true,
@@ -131,11 +130,11 @@ const Register = () => {
                             Sign In
                         </Link>
                     </Text>
-                 
+                
                     <Button
                         type="primary" 
-                        htmlType="submit"
                         loading={loading}
+                        htmlType="submit"
                     >
                         Register
                     </Button>
