@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Modal, Form, Input, Select, notification } from 'antd';
 import { issueTypes, priority, taskStatus } from '../../../../core/constants/issue';
 import Editor from '../Editor';
-import { doc, setDoc, getDocs, db, collection } from '../../../../services/firebase/firebase';
+import { doc, setDoc, db } from '../../../../services/firebase/firebase';
 
 const CreateIssueModal = ({ visible, setVisible, users }) => {
     const [ form ] = Form.useForm();
