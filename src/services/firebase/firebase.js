@@ -1,20 +1,20 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from 'firebase/app';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { getFirestore, setDoc, getDoc, doc } from 'firebase/firestore';
+import { getFirestore, setDoc, getDoc, doc, collection, getDocs } from 'firebase/firestore';
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyBmyK72afbl7TLqLi9lF0brSkSamlUJsc0",
-  authDomain: "my-project-97152-dbc6d.firebaseapp.com",
-  projectId: "my-project-97152-dbc6d",
-  storageBucket: "my-project-97152-dbc6d.appspot.com",
-  messagingSenderId: "400221798863",
-  appId: "1:400221798863:web:979171f96b9bc6b95192ba",
-  measurementId: "G-E0VYYRSFYP"
+  apiKey: "AIzaSyCFGUBpa_nKQGqILdqrdOTWMkYa1ZXnjC4",
+  authDomain: "jira-1ebc5.firebaseapp.com",
+  projectId: "jira-1ebc5",
+  storageBucket: "jira-1ebc5.appspot.com",
+  messagingSenderId: "396386233238",
+  appId: "1:396386233238:web:330433fc2ed51b60aa0bb7",
+  measurementId: "G-GXD0T00J4G"
 };
 
 // Initialize Firebase
@@ -24,5 +24,5 @@ const db = getFirestore(app);
 
 
 export {
-    app, auth, db, getFirestore, setDoc, getDoc, doc, onAuthStateChanged
+    app, auth, db, getFirestore, getDocs, collection, setDoc, getDoc, doc, onAuthStateChanged
 }

@@ -1,32 +1,31 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../../../services/firebase/firebase';
-import { notification, Typography, Input, Button, Divider, Form, Flex } from 'antd';
+import { Typography, Input, Button, Divider, Form, Flex, notification } from 'antd';
 import AuthWrapper from '../../../components/shared/AuthWrapper';
 import LoginCoverImg from '../../../../core/images/loginCover.png';
 import { Link, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
 
 const { Title, Text } = Typography;
 
+
 const Login = () => {
     const [loading, setLoading] = useState(false);
-    const [form] = Form.useForm();
+    const [ form ] = Form.useForm();
     const navigate = useNavigate();
 
     const handleLogin = async (values) => {
         setLoading(true);
 
-        try {
+        try{
             const { email, password } = values;
-            await signInWithEmailAndPassword(auth, email, password)
-            navigate('/cabinet')
-        } catch(error) {
-            console.log(error, ">>>.");
+            await signInWithEmailAndPassword(auth, email, password);
+            navigate('/cabinet');
+        }catch(error) {
             notification.error({
                 message: 'Error',
-                description: 'Invalid login credentials'
-            })
+                description: 'Invalid login credentials',
+            });
         } finally {
             setLoading(false);
         }
@@ -55,7 +54,8 @@ const Login = () => {
                 </Form.Item>
 
                 <Form.Item 
-                    name="password" label="Password"
+                    name="password" 
+                    label="Password"
                     rules={[
                         {
                             required: true,
@@ -89,6 +89,7 @@ const Login = () => {
             </Form>
         </AuthWrapper>
     )
-}
+};
 
 export default Login;
+

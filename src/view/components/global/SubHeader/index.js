@@ -1,12 +1,29 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Input, Avatar, Button, Divider } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
-import CreateIssueModal from '../../shared/CreateIssueMoadal';
+import CreateIssueModal from '../../shared/CreateIssueModal';
+import { getFirstLetters } from '../../../../core/helpers/getFirstLetters';
+import { db, getDocs, collection } from '../../../../services/firebase/firebase';
 import './index.css';
 
 const SubHeader = () => {
-    const [ModalVisible, setModalVisible] = useState(false)
+    const [users, setUsers] = useState([]);
+    const [modalVisible, setModalVisible] = useState(false);
 
+    useEffect(() => {
+        const handleGetusersData = async () => {
+            const queryData = await getDocs(collection(db, 'registerUsers'));
+            const result = queryData.docs.map((doc) => {
+                const {firstName, lastName} = doc.data();
+                return {label: `${firstName} ${lastName}`, value: doc.id }
+            });
+
+            setUsers(result);
+        }
+
+        handleGetusersData()
+    }, [])
+    
     const handleOpenModal = () => {
         setModalVisible(true);
     }
@@ -29,39 +46,30 @@ const SubHeader = () => {
                     }
                 }}
             >
-                <Avatar style={{backgroundColor: 'green'}}>
-                    DS
-                </Avatar>
-
-                <Avatar style={{backgroundColor: 'indigo'}}>
-                    KA
-                </Avatar>
-
-                <Avatar style={{backgroundColor: 'red'}}>
-                    DD
-                </Avatar>
-
-                <Avatar style={{backgroundColor: 'blue'}}>
-                    AD
-                </Avatar>
-
-                <Avatar style={{backgroundColor: 'blue'}}>
-                    AD
-                </Avatar>
+                {
+                    users.map((user) => {
+                        console.log(user, ">>>");
+                        return (
+                            <Avatar style={{background: 'green'}}>
+                                {getFirstLetters(`${user.label}`)}
+                            </Avatar>
+                        )
+                    })
+                }
             </Avatar.Group>
 
             <Divider type="vertical"/>
 
             <Button 
-                type="primary" 
-                icon={<PlusOutlined />}
+                type="primary" icon={<PlusOutlined />}
                 onClick={handleOpenModal}
             >
                 Create issue
             </Button>
 
             <CreateIssueModal 
-                visible={ModalVisible}
+                users={users}
+                visible={modalVisible}
                 setVisible={setModalVisible}
             />
         </div>
