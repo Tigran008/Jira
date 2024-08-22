@@ -2,11 +2,19 @@ import { useState } from 'react';
 import { Modal, Form, Input, Select, notification } from 'antd';
 import { issueTypes, priority, taskStatus } from '../../../../core/constants/issue';
 import Editor from '../Editor';
-import { doc, setDoc, db } from '../../../../services/firebase/firebase';
+import { doc, setDoc, db, updateDoc, arrayUnion } from '../../../../services/firebase/firebase';
 
-const CreateIssueModal = ({ visible, setVisible, users }) => {
+const CreateIssueModal = ({ visible, setVisible, users }) => { //render
     const [ form ] = Form.useForm();
+   
     const [confirmLoading, setConfirmLoading] = useState(false);
+
+    const handleUpdateAssigneesTask = async (taskId, assignerId) => {
+        const docRef = doc(db, 'registerUsers', assignerId);
+        await updateDoc(docRef, {
+            task: arrayUnion(taskId)
+        })
+    };
 
     const handleCloseModal = () => {
         setVisible(false);
@@ -14,27 +22,28 @@ const CreateIssueModal = ({ visible, setVisible, users }) => {
     }
 
     const handleCreateIssue = async (values) => {
+        const taskId = `${Date.now()}`;
         setConfirmLoading(true);
 
         const taskDataModel = {
             status: taskStatus.TODO,
             ...values
         }
-
+     
         try{
-            const createDoc = doc(db, 'issue', `${Date.now()}`);
+            const createDoc = doc(db, 'issue', taskId);
             await setDoc(createDoc, taskDataModel);
-
+            await handleUpdateAssigneesTask(taskId, values.assignees)
             notification.success({
                 message: 'Your task has been created',
-            })
+            });
 
             setVisible(false);
             form.resetFields();
         }catch(error) {
             notification.error({
                 message: 'Error ooops :(',
-            })
+            });
         }finally{
             setConfirmLoading(false);
         }
@@ -50,6 +59,13 @@ const CreateIssueModal = ({ visible, setVisible, users }) => {
             confirmLoading={confirmLoading}
             onCancel={handleCloseModal}
             onOk={form.submit}
+            styles={{
+                body: {
+                    maxHeight: '600px',
+                    overflowY: 'auto',
+                    overflowX: 'hidden'
+                }
+            }}
         >
             <Form layout="vertical" form={form} onFinish={handleCreateIssue}>
                 <Form.Item

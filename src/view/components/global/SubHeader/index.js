@@ -2,28 +2,29 @@ import { useState, useEffect } from 'react';
 import { Input, Avatar, Button, Divider } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import CreateIssueModal from '../../shared/CreateIssueModal';
-import { getFirstLetters } from '../../../../core/helpers/getFirstLetters';
 import { db, getDocs, collection } from '../../../../services/firebase/firebase';
+import { getFirstLetters } from '../../../../core/helpers/getFirstLetters';
 import './index.css';
 
 const SubHeader = () => {
     const [users, setUsers] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
-
+    
     useEffect(() => {
-        const handleGetusersData = async () => {
+        const handleGetUsersData = async () => {
             const queryData = await getDocs(collection(db, 'registerUsers'));
             const result = queryData.docs.map((doc) => {
-                const {firstName, lastName} = doc.data();
-                return {label: `${firstName} ${lastName}`, value: doc.id }
+                const { firstName, lastName } = doc.data();
+                return {label: `${firstName} ${lastName}`, value: doc.id}
             });
 
             setUsers(result);
         }
-
-        handleGetusersData()
-    }, [])
     
+        handleGetUsersData();
+    }, []);
+
+
     const handleOpenModal = () => {
         setModalVisible(true);
     }
@@ -48,9 +49,8 @@ const SubHeader = () => {
             >
                 {
                     users.map((user) => {
-                        console.log(user, ">>>");
                         return (
-                            <Avatar style={{background: 'green'}}>
+                            <Avatar style={{backgroundColor: 'green'}}>
                                 {getFirstLetters(`${user.label}`)}
                             </Avatar>
                         )
