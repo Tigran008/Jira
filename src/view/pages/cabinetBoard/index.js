@@ -1,108 +1,175 @@
-import React, { useState } from 'react';
+import { useEffect, useContext, useState } from 'react';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
-import { taskStatus } from '../../../core/constants/issue';
+import { db, updateDoc, doc } from '../../../services/firebase/firebase';
+import LoadingWrapper from '../../components/shared/LoadingWrapper';
+import EditIssueModal from '../../components/shared/EditIssueModal';
+import { Typography, Flex } from 'antd';
 import './index.css';
+import { AuthContext } from '../../../context/AuthContext';
+import { ISSUE_OPTION, PRIORITY_OPTION } from '../../../core/constants/issue';
 
-const taskStatusModel = {
-    [taskStatus.TODO]: {
-        name: taskStatus.TODO,
-        items: [
-            {id: '1', title: 'Create Button'},
-        ],
-    },
-    [taskStatus.IN_PROGRESS]: {
-        name: taskStatus.IN_PROGRESS,
-        items: [],
-    },
-    [taskStatus.TEST]: {
-        name: taskStatus.TEST,
-        items: [],
-    },
-    [taskStatus.DONE]: {
-        name: taskStatus.DONE,
-        items: []
-    }
-};
+const { Title, Text } = Typography;
 
 
 const CabinetBoard = () => {
-    const [columns, setColumns] = useState(taskStatusModel); 
+    const { columns, issuesLoading, handleGetIssues, setColumns } = useContext(AuthContext)
+    const [selectedIssueData, setSelectedIssueData] = useState(null);
 
+    useEffect(() => {
+        handleGetIssues();
+    }, []);
 
-    const result = [
-        ['todo', { name: taskStatus.TODO, items: []}],
-        ['inProgress', { name: taskStatus.IN_PROGRESS, items: []}],
-        ['test', { name: taskStatus.TEST, items: []}],
-    ]
-    
+    const handleDragEnd = result => {
+        const { source, destination } = result;
+        const sourceColumn = columns[source.droppableId];
+        const destColumn = columns[destination.droppableId];
+
+        const sourceItems = [...sourceColumn.items];
+        const destItems = [...destColumn.items]; 
+
+        const [removed] = sourceItems.splice(source.index, 1);
+        destItems.splice(destination.index, 0, removed);
+
+        if (source.droppableId !== destination.droppableId) {
+            setColumns({
+                ...columns,
+                [source.droppableId]: {
+                    ...sourceColumn,
+                    items: sourceItems
+                },
+                [destination.droppableId]: {
+                    ...destColumn,
+                    items: destItems
+                }
+            })
+        } else {
+            const sourceColumn = columns[source.droppableId];
+            const sourceColumnItems = sourceColumn.items;
+            const [removed] = sourceColumnItems.splice(source.index, 1);
+            sourceColumnItems.splice(destination.index, 0, removed);
+            setColumns({
+                ...columns,
+                [source.droppableId]: {
+                    ...sourceColumn,
+                    items: sourceColumnItems
+                }
+            })
+        }
+    };                      
+
+    const handleChangeTaskStatus = async result => { 
+        if (result.destination) {
+            try{
+                handleDragEnd(result);
+                const { destination: { droppableId, index }, draggableId } = result;
+
+                const docRef = doc(db, 'issue', draggableId);
+                await updateDoc(docRef, {
+                    status: droppableId,
+                    index
+                });
+            }catch {
+                console.log('error')
+            }
+        }
+    }
+
     return (
         <div className="drag_context_container">
-            <DragDropContext>
-                {
-                    Object.entries(columns).map(([columnId, column], index) => {
-                        return (
-                            <div className="column_container" key={columnId}>
-                                <h2>{column.name}</h2>
-
-                                <div style={{margin: 10}}>
-                                    <Droppable droppableId={columnId} key={columnId}> 
-                                        {(provided, snapshot) => {
-                                            console.log(provided, 'provided');
-                                            return (
-                                                <div
-                                                    {...provided.droppableProps}
-                                                    ref={provided.innerRef}
-                                                    style={{
-                                                        width: 200,
-                                                        padding: 6,
-                                                        minHeight: 600,
-                                                        backgroundColor: snapshot.isDraggingOver ? 'lightblue' : '#f4f5f7'
-                                                    }}
-                                                >
-                                                    {
-                                                        column.items.map((item, index) => {
-                                                            return (
-                                                                <Draggable 
-                                                                    key={item.id}
-                                                                    draggableId={item.id} 
-                                                                    index={index} 
-                                                                >
-                                                                    {
-                                                                        (provided, snapshot) => {
-                                                                            return (
-                                                                                <div
-                                                                                    ref={provided.innerRef}
-                                                                                    {...provided.draggableProps}
-                                                                                    {...provided.dragHandleProps}
-                                                                                    style={{
-                                                                                       userSelect: 'none',
-                                                                                        padding: 18,
-                                                                                        minHeight: 50,
-                                                                                        color: 'white',
-                                                                                        backgroundColor: snapshot.isDragging ?  'gray' : 'blue',
-                                                                                        ...provided.draggableProps.style,
-                                                                                    }}
-                                                                                >
-                                                                                    {item.title}
-                                                                                </div>
-                                                                            )
-                                                                        }
-                                                                    }
-                                                                </Draggable>
-                                                            )
-                                    
-                                                        })
-                                                    }
-                                                </div>
-                                            )
-                                        }}
-                                    </Droppable>
+        <LoadingWrapper loading={issuesLoading}>
+                <DragDropContext onDragEnd={handleChangeTaskStatus}>
+                    {
+                        Object.entries(columns).map(([columnId, column]) => {
+                            return (
+                                <div className="column_container" key={columnId}>
+                                <div className="column_header">
+                                        <Title level={5} type="secondary">
+                                            {column.name}
+                                            {' '}
+                                            {column.items.length}
+                                        </Title>
                                 </div>
-                            </div>
-                        )
-                    })
-                }
-            </DragDropContext>
+
+                                    <div>
+                                        <Droppable droppableId={columnId} key={columnId}> 
+                                            {(provided, snapshot) => {
+                                                return (
+                                                    <div
+                                                        {...provided.droppableProps}
+                                                        ref={provided.innerRef}
+                                                        className="droppable_container"
+                                                        style={{
+                                                            backgroundColor: snapshot.isDraggingOver ? 'lightblue' : '#f4f5f7'
+                                                        }}
+                                                    >
+                                                        {
+                                                            column.items.map((item, index) => {
+                                                                return (
+                                                                    <Draggable 
+                                                                        key={item.key}
+                                                                        draggableId={item.key} 
+                                                                        index={index} 
+                                                                    >
+                                                                        {
+                                                                            (provided, snapshot) => {
+                                                                                return (
+                                                                                    <div
+                                                                                        onClick={() => setSelectedIssueData(item)}
+                                                                                        className="issue_card_container"
+                                                                                        ref={provided.innerRef}
+                                                                                        {...provided.draggableProps}
+                                                                                        {...provided.dragHandleProps}
+                                                                                        style={{
+                                                                                            backgroundColor: snapshot.isDragging ?  '#ebecf0' : '#fff',
+                                                                                            ...provided.draggableProps.style,
+                                                                                        }}
+                                                                                    >
+                                                                                        <Text>
+                                                                                            {item.shortSummary}
+                                                                                        </Text>
+
+                                                                                        <Flex justify="space-between">
+                                                                                            <div>
+                                                                                                {ISSUE_OPTION[item.issueType].icon}
+                                                                                                {' '}
+                                                                                                {PRIORITY_OPTION[item.priority].icon}
+                                                                                            </div>
+
+                                                                                            <div>
+
+                                                                                            </div>
+                                                                                        </Flex>
+                                                                                    </div>
+                                                                                )
+                                                                            }
+                                                                        }
+                                                                    </Draggable>
+                                                                )
+                                        
+                                                            })
+                                                        }
+                                                    </div>
+                                                )
+                                            }}
+                                        </Droppable>
+                                    </div>
+                                </div>
+                            )
+                        })
+                    }
+                </DragDropContext>
+            </LoadingWrapper>
+
+            {
+                Boolean(selectedIssueData) && (
+                    <EditIssueModal 
+                        issueData={selectedIssueData}
+                        visible={Boolean(selectedIssueData)}
+                        onClose={() => setSelectedIssueData(null)}    
+                    />
+                )    
+            }
+
         </div>
     )
 };
