@@ -17,7 +17,7 @@ const CabinetBoard = () => {
 
     useEffect(() => {
         handleGetIssues();
-    }, []);
+    }, [handleGetIssues]);
 
     const handleDragEnd = result => {
         const { source, destination } = result;
