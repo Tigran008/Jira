@@ -4,7 +4,6 @@ import { PlusOutlined } from '@ant-design/icons';
 import CreateIssueModal from '../../shared/CreateIssueModal';
 import { getFirstLetters } from '../../../../core/helpers/getFirstLetters';
 import './index.css';
-import EditIssueModal from '../../shared/EditIssueModal';
 import { AuthContext } from '../../../../context/AuthContext';
 
 const SubHeader = () => {

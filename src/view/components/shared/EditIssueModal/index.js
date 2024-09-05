@@ -1,4 +1,4 @@
-import { Modal, Form, Input, Select, notification, Typography, Space } from "antd";
+import { Modal, Form, notification, Typography, Space } from "antd";
 import { ISSUE_OPTION } from "../../../../core/constants/issue";
 import IssueModalForm from "../IssueModalForm";
 import { updateDoc, doc, db } from "../../../../services/firebase/firebase";
